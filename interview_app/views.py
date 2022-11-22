@@ -55,13 +55,6 @@ def candidata_post(request):
         return Response(serializer.data,status=status.HTTP_200_OK) 
 
 
-@api_view(['GET'])
-def interview_schedule_get(request):
-    if request.method == 'GET':
-        interview = Interview_Schedule.objects.all()
-        serializer = Interview_Schedule_Serializer(interview,many=True)
-        return Response(serializer.data)
-
 @api_view(['POST'])
 def interview_details(request):
     if request.method == 'POST':
@@ -114,3 +107,10 @@ def interview_details(request):
                 serializer.is_valid(raise_exception=True)
                 return Response(serializer.data,status=status.HTTP_200_OK)    
             
+
+@api_view(['GET'])
+def interview_schedule_get(request):
+    if request.method == 'GET':
+        interview = Interview_Schedule.objects.all()
+        serializer = Interview_Schedule_Serializer(interview,many=True)
+        return Response(serializer.data)
