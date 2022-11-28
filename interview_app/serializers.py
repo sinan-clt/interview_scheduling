@@ -15,7 +15,7 @@ class CandidateSerializer(serializers.ModelSerializer):
 class Interview_Schedule_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Interview_Schedule
-        fields = '__all__'
+        fields = ('interviewerName', 'CandidateName', 'date')
 
 
 

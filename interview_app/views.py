@@ -62,7 +62,6 @@ def interview_details(request):
             interviewerName = request.data['interviewerName']
             CandidateName = request.data['CandidateName']
             date = request.data['date']
-            interview_time = request.data['interview_time']
 
             interviwerdetails = Interviewer.objects.get(id = interviewerName)
             iser = InterviewerSerializer(interviwerdetails)
@@ -74,38 +73,32 @@ def interview_details(request):
             itf = iser.data['time_from'] 
             itt = iser.data['time_to']
 
-            # interviewer available time
-            ctf = cser.data['time_from']
-            ctt = cser.data['time_to']
-
+            import datetime as dt
+            from datetime import timedelta
+            start=itf
+            end=itt
+            start_dt = dt.datetime.strptime(start, '%H:%M:%S')
+            end_dt = dt.datetime.strptime(end, '%H:%M:%S')
+            diff = (end_dt - start_dt)
+            k=int(diff.seconds/(60*60))
+            prev_time = start_dt
+            time_intervals = []
+            while k > 0:
+                new_time = prev_time + timedelta(hours=1)
+                time_intervals.append((dt.datetime.strftime(prev_time, '%H:%M:%S'),dt.datetime.strftime(new_time, '%H:%M:%S')))
+                prev_time = new_time
+                k -= 1
+            print(time_intervals)
+            
             # checking date availabity 
             if date == cser.data['date']:
-                # checking time availabity 
-                if itf < interview_time < itt:
-                    if ctf < interview_time < ctt:
-                        data_dict = {'interviewerName': interviewerName, 'CandidateName': CandidateName,
-                                    'date': date, 'interview_time': interview_time}
-                        query_dict = QueryDict('', mutable=True)
-                        query_dict.update(data_dict)
-                        interview_details = Interview_Schedule_Serializer(data=query_dict)
-                        if interview_details.is_valid():
-                            interview_details.save()
-                            data = {"data": interview_details.data}
-                            return Response(data, status=status.HTTP_200_OK)
-                        else:
-                            data = {'status': 400}
-                            return Response(data, status=status.HTTP_200_OK)
-                    else:
-                        return JsonResponse(cser.data['CandidateName']+' is not available in this time.Please select anthoner Time Slot.'+'Select between '+ctf+'-'+ctt,safe=False)
-                else:
-                    return JsonResponse(iser.data['interviewerName']+' is not available in this time.Please select anthoner Time Slot.'+'Select between '+itf+'-'+itt,safe=False)
-                        
+                return JsonResponse(time_intervals, safe=False)            
             else:
                 return JsonResponse(cser.data['CandidateName']+' is not available in this '+date+'.Please select anthoner Candidate.',safe=False)   
-        except:
-                serializer = Interview_Schedule_Serializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                return Response(serializer.data,status=status.HTTP_200_OK)    
+        except Exception as e:
+            serializer = Interview_Schedule_Serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)    
             
 
 @api_view(['GET'])
@@ -114,3 +107,65 @@ def interview_schedule_get(request):
         interview = Interview_Schedule.objects.all()
         serializer = Interview_Schedule_Serializer(interview,many=True)
         return Response(serializer.data)
+            
+
+@api_view(['GET'])
+def interview_schedule_get(request):
+    if request.method == 'GET':
+        interview = Interview_Schedule.objects.all()
+        serializer = Interview_Schedule_Serializer(interview,many=True)
+        return Response(serializer.data)
+
+
+
+# @api_view(['POST'])
+# def interview_details(request):
+#     if request.method == 'POST':
+#         try:
+#             interviewerName = request.data['interviewerName']
+#             CandidateName = request.data['CandidateName']
+#             date = request.data['date']
+#             interview_time = request.data['interview_time']
+
+#             interviwerdetails = Interviewer.objects.get(id = interviewerName)
+#             iser = InterviewerSerializer(interviwerdetails)
+
+#             candidatedetails = Candidate.objects.get(id = CandidateName)
+#             cser = CandidateSerializer(candidatedetails)
+
+#             # interviewer available times
+#             itf = iser.data['time_from'] 
+#             itt = iser.data['time_to']
+
+#             # interviewer available time
+#             ctf = cser.data['time_from']
+#             ctt = cser.data['time_to']
+
+#             # checking date availabity 
+#             if date == cser.data['date']:
+#                 # checking time availabity 
+#                 if itf < interview_time < itt:
+#                     if ctf < interview_time < ctt:
+#                         data_dict = {'interviewerName': interviewerName, 'CandidateName': CandidateName,
+#                                     'date': date, 'interview_time': interview_time}
+#                         query_dict = QueryDict('', mutable=True)
+#                         query_dict.update(data_dict)
+#                         interview_details = Interview_Schedule_Serializer(data=query_dict)
+#                         if interview_details.is_valid():
+#                             interview_details.save()
+#                             data = {"data": interview_details.data}
+#                             return Response(data, status=status.HTTP_200_OK)
+#                         else:
+#                             data = {'status': 400}
+#                             return Response(data, status=status.HTTP_200_OK)
+#                     else:
+#                         return JsonResponse(cser.data['CandidateName']+' is not available in this time.Please select anthoner Time Slot.'+'Select between '+ctf+'-'+ctt,safe=False)
+#                 else:
+#                     return JsonResponse(iser.data['interviewerName']+' is not available in this time.Please select anthoner Time Slot.'+'Select between '+itf+'-'+itt,safe=False)
+                        
+#             else:
+#                 return JsonResponse(cser.data['CandidateName']+' is not available in this '+date+'.Please select anthoner Candidate.',safe=False)   
+#         except:
+#                 serializer = Interview_Schedule_Serializer(data=request.data)
+#                 serializer.is_valid(raise_exception=True)
+#                 return Response(serializer.data,status=status.HTTP_200_OK)    
