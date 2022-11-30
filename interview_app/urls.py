@@ -7,7 +7,6 @@ urlpatterns = [
     path('interviewer_post',views.interviewer_post,name='interviewer_post'),
     path('candidate_get',views.candidate_get,name='candidate_get'),
     path('candidata_post',views.candidata_post,name='candidata_post'),
-    path('interview_details',views.interview_details,name='interview_details'),   
-    path('interview_schedule_get',views.interview_schedule_get,name='interview_schedule_get'),
+    path('check_slots',views.checkSlots,name='check_slots'),   
 
 ]
